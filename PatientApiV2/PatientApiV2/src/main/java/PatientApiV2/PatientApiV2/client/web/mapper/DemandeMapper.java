@@ -5,12 +5,19 @@ import PatientApiV2.PatientApiV2.client.web.dto.DemandeResponseDto;
 import PatientApiV2.PatientApiV2.patient.data.entity.Demande;
 import PatientApiV2.PatientApiV2.patient.data.entity.Patient;
 import PatientApiV2.PatientApiV2.patient.data.entity.StatutDemande;
+import PatientApiV2.PatientApiV2.shared.mapper.DateMapper;
+import org.springframework.stereotype.Component;
 
+@Component
 public final class DemandeMapper {
 
-    private DemandeMapper() {}
+    private final DateMapper dateMapper;
 
-    public static Demande toEntity(DemandeCreateRequestDto dto, Patient patient) {
+    public DemandeMapper(DateMapper dateMapper) {
+        this.dateMapper = dateMapper;
+    }
+
+    public Demande toEntity(DemandeCreateRequestDto dto, Patient patient) {
         if (dto == null || patient == null) {
             return null;
         }
@@ -22,7 +29,7 @@ public final class DemandeMapper {
                 .build();
     }
 
-    public static DemandeResponseDto toDto(Demande demande) {
+    public DemandeResponseDto toDto(Demande demande) {
         if (demande == null) {
             return null;
         }
@@ -31,7 +38,7 @@ public final class DemandeMapper {
                 demande.getPatient().getId(),
                 demande.getPatient().getNom(),
                 demande.getPatient().getPrenom(),
-                demande.getDateDemande(),
+                dateMapper.formatLocalDate(demande.getDateDemande().toLocalDate(), "dd-MM-yyyy"),
                 demande.getMotif(),
                 demande.getStatut(),
                 demande.getCreatedAt(),

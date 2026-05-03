@@ -8,7 +8,7 @@ public record DemandeResponseDto(
         Long patientId,
         String patientNom,
         String patientPrenom,
-        LocalDateTime dateDemande,
+        String dateDemande,
         String motif,
         StatutDemande statut,
         LocalDateTime createdAt,

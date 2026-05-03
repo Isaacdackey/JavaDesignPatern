@@ -1,5 +1,6 @@
 package PatientApiV2.PatientApiV2.patient.data.entity;
 
+import PatientApiV2.PatientApiV2.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,13 +17,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@PrimaryKeyJoinColumn(name = "users_id")
 
+public class Patient extends User {
 
-public class Patient {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
     @Column(unique = true , updatable = false)
     private String numero;
     private String nom;

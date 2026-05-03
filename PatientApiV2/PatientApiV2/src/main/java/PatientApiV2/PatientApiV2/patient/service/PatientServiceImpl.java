@@ -6,6 +6,7 @@ import PatientApiV2.PatientApiV2.client.web.dto.PatientCreateResponseDto;
 import PatientApiV2.PatientApiV2.client.web.mapper.PatientCreateMapper;
 import PatientApiV2.PatientApiV2.patient.data.entity.Patient;
 import PatientApiV2.PatientApiV2.patient.data.repository.PatientRepository;
+import PatientApiV2.PatientApiV2.shared.exceptions.EntityExistException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +39,10 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientCreateResponseDto addPatient(PatientCreateRequestDto patient) {
+        Optional <Patient> existingPatient = patientRepository.findByTelephone(patient.telephone());
+        if (existingPatient.isPresent()) {
+            throw new EntityExistException ("Un patient avec ce numéro de téléphone existe déjà.");
+        }
         Patient patientEntity = PatientCreateMapper.toEntity(patient);
         patientRepository.save(patientEntity);
         return PatientCreateMapper.toDto(patientEntity);

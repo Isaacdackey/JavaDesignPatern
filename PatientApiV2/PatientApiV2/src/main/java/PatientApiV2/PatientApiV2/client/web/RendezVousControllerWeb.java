@@ -5,15 +5,15 @@ import PatientApiV2.PatientApiV2.client.web.dto.RendezVousResponseDto;
 import PatientApiV2.PatientApiV2.client.web.dto.RendezVousUpdateRequestDto;
 import PatientApiV2.PatientApiV2.patient.data.entity.StatutRdv;
 import PatientApiV2.PatientApiV2.patient.service.RendezVousService;
+import PatientApiV2.PatientApiV2.shared.response.RestResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rendez-vous")
+@RequestMapping("/api/v1/rendez-vous")
 public class RendezVousControllerWeb {
 
     private final RendezVousService rendezVousService;
@@ -23,82 +23,49 @@ public class RendezVousControllerWeb {
     }
 
     @PostMapping
-    public ResponseEntity<RendezVousResponseDto> creerRendezVous(
+    public ResponseEntity<RestResponse<RendezVousResponseDto>> creerRendezVous(
             @Valid @RequestBody RendezVousCreateRequestDto requestDto) {
         RendezVousResponseDto nouveauRdv = rendezVousService.creerRendezVous(requestDto);
-        return new ResponseEntity<>(nouveauRdv, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(RestResponse.success("Rendez-vous créé avec succès", nouveauRdv));
     }
 
     @GetMapping
-    public ResponseEntity<List<RendezVousResponseDto>> getAllRendezVous() {
-        return new ResponseEntity<>(rendezVousService.getAllRendezVous(), HttpStatus.OK);
+    public ResponseEntity<RestResponse<List<RendezVousResponseDto>>> getAllRendezVous() {
+        List<RendezVousResponseDto> rdvs = rendezVousService.getAllRendezVous();
+        return ResponseEntity.ok(RestResponse.success("Liste des rendez-vous", rdvs));
     }
 
     @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousByPatient(@PathVariable Long patientId) {
-        return new ResponseEntity<>(rendezVousService.getRendezVousByPatient(patientId), HttpStatus.OK);
-    }
-
-    @GetMapping("/statut/{statut}")
-    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousByStatut(@PathVariable String statut) {
-        try {
-            StatutRdv statutEnum = StatutRdv.valueOf(statut.toUpperCase());
-            return new ResponseEntity<>(rendezVousService.getRendezVousByStatut(statutEnum), HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @GetMapping("/patient/{patientId}/statut/{statut}")
-    public ResponseEntity<List<RendezVousResponseDto>> getRendezVousByPatientAndStatut(
-            @PathVariable Long patientId,
-            @PathVariable String statut) {
-        try {
-            StatutRdv statutEnum = StatutRdv.valueOf(statut.toUpperCase());
-            return new ResponseEntity<>(
-                    rendezVousService.getRendezVousByPatientAndStatut(patientId, statutEnum),
-                    HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<RestResponse<List<RendezVousResponseDto>>> getRendezVousByPatient(@PathVariable Long patientId) {
+        List<RendezVousResponseDto> rdvs = rendezVousService.getRendezVousByPatient(patientId);
+        return ResponseEntity.ok(RestResponse.success("Rendez-vous du patient", rdvs));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RendezVousResponseDto> getRendezVousById(@PathVariable Long id) {
-        return rendezVousService.getRendezVousById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<RestResponse<RendezVousResponseDto>> getRendezVousById(@PathVariable Long id) {
+        RendezVousResponseDto rdv = rendezVousService.getRendezVousById(id)
+                .orElseThrow(() -> new RuntimeException("Rendez-vous non trouvé"));
+        return ResponseEntity.ok(RestResponse.success("Rendez-vous récupéré", rdv));
     }
 
     @PutMapping("/{id}/annuler")
-    public ResponseEntity<RendezVousResponseDto> annulerRendezVous(@PathVariable Long id) {
-        try {
-            RendezVousResponseDto rdvAnnule = rendezVousService.annulerRendezVous(id);
-            return ResponseEntity.ok(rdvAnnule);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<RestResponse<RendezVousResponseDto>> annulerRendezVous(@PathVariable Long id) {
+        RendezVousResponseDto rdvAnnule = rendezVousService.annulerRendezVous(id);
+        return ResponseEntity.ok(RestResponse.success("Rendez-vous annulé", rdvAnnule));
     }
 
     @PutMapping("/{id}/confirmer")
-    public ResponseEntity<RendezVousResponseDto> confirmerRendezVous(@PathVariable Long id) {
-        try {
-            RendezVousResponseDto rdvConfirme = rendezVousService.confirmerRendezVous(id);
-            return ResponseEntity.ok(rdvConfirme);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<RestResponse<RendezVousResponseDto>> confirmerRendezVous(@PathVariable Long id) {
+        RendezVousResponseDto rdvConfirme = rendezVousService.confirmerRendezVous(id);
+        return ResponseEntity.ok(RestResponse.success("Rendez-vous confirmé", rdvConfirme));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RendezVousResponseDto> modifierRendezVous(
+    public ResponseEntity<RestResponse<RendezVousResponseDto>> modifierRendezVous(
             @PathVariable Long id,
             @Valid @RequestBody RendezVousUpdateRequestDto updateDto) {
-        try {
-            RendezVousResponseDto rdvModifie = rendezVousService.modifierRendezVous(id, updateDto);
-            return ResponseEntity.ok(rdvModifie);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        RendezVousResponseDto rdvModifie = rendezVousService.modifierRendezVous(id, updateDto);
+        return ResponseEntity.ok(RestResponse.success("Rendez-vous modifié", rdvModifie));
     }
 }
